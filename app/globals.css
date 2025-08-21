@@ -1,26 +1,28 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root{
+  --bg:#0b1020; /* deep backdrop */
 }
+html,body{ height:100% }
+body{ @apply text-slate-100 bg-[color:var(--bg)] antialiased }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* smooth section container */
+.container-px{ @apply px-4 sm:px-6 lg:px-8 }
+.section{ @apply container-px max-w-7xl mx-auto py-16 }
+.card{ @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-xl }
+.btn{ @apply inline-flex items-center gap-2 rounded-xl px-5 py-3 font-semibold shadow-lg transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 }
+.btn-primary{ @apply bg-brand-500 text-white }
+.btn-secondary{ @apply bg-white/10 text-white }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* typography */
+.h1{ @apply text-4xl/tight sm:text-5xl/tight font-extrabold tracking-tight }
+.h2{ @apply text-2xl sm:text-3xl font-bold }
+.muted{ @apply text-slate-400 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* simple grid helpers */
+.grid-3{ @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3 }
+
+/* nav glass */
+.navglass{ @apply fixed top-0 inset-x-0 z-50 bg-black/30 backdrop-blur supports-[backdrop-filter]:bg-black/10 }
