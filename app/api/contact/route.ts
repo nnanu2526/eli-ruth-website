@@ -1,69 +1,51 @@
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+export const dynamic = "force-dynamic";
 
-const schema = z.object({
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { z } from "zod"
+import nodemailer from "nodemailer"
+
+// Zod schema for validation
+const ContactSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
-  message: z.string().min(10).max(2000),
+  message: z.string().min(5),
 })
 
-export async function POST(req: Request){
-  // Accept form or JSON
-  let data: { name: string; email: string; message: string }
-  const ctype = req.headers.get('content-type') || ''
-  if (ctype.includes('form')) {
-    const f = await req.formData()
-    data = {
-      name: String(f.get('name') || ''),
-      email: String(f.get('email') || ''),
-      message: String(f.get('message') || ''),
-    }
-  } else {
-    data = await req.json()
+export async function POST(req: Request) {
+  try {
+    const form = await req.json()
+    const parsed = ContactSchema.parse(form)
+
+    // Save to DB
+    const saved = await prisma.contactMessage.create({
+      data: {
+        name: parsed.name,
+        email: parsed.email,
+        message: parsed.message,
+      },
+    })
+
+    // Send email notification
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    })
+
+    await transporter.sendMail({
+      from: `"Eli Ruth Website" <${process.env.EMAIL_USER}>`,
+      to: "your-email@example.com", // 👈 replace with your real email
+      subject: "New Contact Form Submission",
+      text: `From: ${parsed.name} <${parsed.email}>\n\n${parsed.message}`,
+    })
+
+    return NextResponse.json({ ok: true, saved })
+  } catch (err: any) {
+    console.error("Contact form error:", err)
+    return NextResponse.json({ ok: false, error: err.message }, { status: 400 })
   }
-
-  const parsed = schema.safeParse(data)
-  if (!parsed.success) {
-    return NextResponse.json(
-      { ok: false, errors: parsed.error.flatten().fieldErrors },
-      { status: 400 }
-    )
-  }
-
-  const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0] || undefined
-  const ua = req.headers.get('user-agent') || undefined
-
-  // Save to DB
-  await prisma.contactMessage.create({
-    data: { ...parsed.data, ip, userAgent: ua },
-  })
-
-  // Optional email — only if env vars are set
-  if (
-    process.env.SMTP_HOST &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASS &&
-    process.env.CONTACT_TO
-  ) {
-    try {
-      const nodemailer = await import('nodemailer')
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT || 587),
-        secure: false,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      })
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: process.env.CONTACT_TO,
-        subject: `New contact from ${parsed.data.name}`,
-        text: `${parsed.data.name} <${parsed.data.email}>\n\n${parsed.data.message}`,
-      })
-    } catch (e) {
-      console.warn('Email send failed:', e)
-    }
-  }
-
-  return NextResponse.json({ ok: true })
 }
+
