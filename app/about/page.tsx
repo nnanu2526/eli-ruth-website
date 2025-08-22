@@ -6,7 +6,7 @@ export default function AboutPage(){
       <PageHeader
         title="About Eli Ruth"
         subtitle="We’re a product studio building human-centered AI platforms that feel effortless and deliver measurable outcomes."
-        backHref="/home#top"
+        backHref="/#top"
       />
 
       {/* Story */}
@@ -71,7 +71,7 @@ export default function AboutPage(){
           <p className="muted">Have a use case in mind? We’d love to collaborate.</p>
           <div className="flex gap-3">
             <a className="btn btn-primary" href="/contact">Start a Project</a>
-            <a className="btn btn-secondary" href="/home#top">Back to Home</a>
+            <a className="btn btn-secondary" href="/#top">Back to Home</a>
           </div>
         </div>
       </section>
