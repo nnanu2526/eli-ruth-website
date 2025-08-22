@@ -1,7 +1,11 @@
 {
+  "version": 2,
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "ignoreCommand": "echo Using Next.js default build",
   "functions": {
-    "app/api/**/*.ts": {
-      "runtime": "nodejs18.x"
+    "api/**.{js,ts}": {
+      "runtime": "nodejs20.x"
     }
   }
 }
