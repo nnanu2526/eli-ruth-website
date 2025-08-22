@@ -1,3 +1,4 @@
+// Ensure this API route only runs at runtime (not during build)
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
@@ -5,8 +6,8 @@ export const fetchCache = "force-no-store";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import nodemailer from "nodemailer";
 
+// Validation schema
 const ContactSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
     const form = await req.json();
     const parsed = ContactSchema.parse(form);
 
-    // Save to DB
+    // Save into DB only
     const saved = await prisma.contactMessage.create({
       data: {
         name: parsed.name,
@@ -27,34 +28,16 @@ export async function POST(req: Request) {
       },
     });
 
-    // Only try email if vars exist
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: `"Eli Ruth Website" <${process.env.EMAIL_USER}>`,
-        to: process.env.NOTIFY_EMAIL || process.env.EMAIL_USER,
-        subject: "📩 New Contact Form Submission",
-        text: `From: ${parsed.name} <${parsed.email}>\n\n${parsed.message}`,
-      });
-    } else {
-      console.log("⚠️ Email skipped: EMAIL_USER or EMAIL_PASS not set");
-    }
-
+    // 👇 No email logic — DB only
     return NextResponse.json({ ok: true, saved });
   } catch (err: any) {
-    console.error("Contact form error:", err);
+    console.error("Contact API error:", err);
     return NextResponse.json(
       { ok: false, error: err.message || "Something went wrong" },
       { status: 400 }
     );
   }
 }
+
 
 
