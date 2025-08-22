@@ -1,7 +1,5 @@
-# Ignore common junk and any nested legacy configs
 node_modules
 .next
 **/now.json
 **/vercel.json
-# allow the root vercel.json we just wrote
 !vercel.json
