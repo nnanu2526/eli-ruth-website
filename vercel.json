@@ -1,7 +1,7 @@
 {
   "functions": {
-    "api/**/*.js": {
-      "includeFiles": "node_modules/.prisma/client/**"
+    "app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
     }
   }
 }

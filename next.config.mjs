@@ -1,16 +1,20 @@
-import withPWA from 'next-pwa';
+import withPWA from "next-pwa";
 
-const withPwa = withPWA({
-  dest: 'public',
-  disable: process.env.NODE_ENV !== 'production',
-  register: true,
-  skipWaiting: true,
-});
+const isProd = process.env.NODE_ENV === "production";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: { domains: ['images.unsplash.com'] },
+  images: { domains: ["images.unsplash.com"] },
+  experimental: {
+    appDir: true,
+  },
+  output: "standalone", // ensures proper deployment with Vercel functions
 };
 
-export default withPwa(nextConfig);
+export default withPWA({
+  dest: "public",
+  disable: !isProd,
+  register: true,
+  skipWaiting: true,
+})(nextConfig);
